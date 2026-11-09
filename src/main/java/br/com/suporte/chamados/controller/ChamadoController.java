@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.ResponseEntity;
 
 import br.com.suporte.chamados.model.Chamado;
 import br.com.suporte.chamados.model.Prioridade;
+import br.com.suporte.chamados.model.ResumoChamados;
 import br.com.suporte.chamados.model.Status;
 
 @RestController
@@ -59,5 +62,32 @@ public class ChamadoController {
     }
 
 
-    
+@GetMapping("/{id}")
+public ResponseEntity<Chamado> consultarChamadoPorId(@PathVariable int id) {
+    for (Chamado chamado : chamados) {
+        if (chamado.id() == id) {
+            return ResponseEntity.ok(chamado);
+        }
+    }
+    return ResponseEntity.notFound().build();
+}
+
+@GetMapping("/resumo")
+public ResumoChamados listarChamadoPorStatus() {
+    int aberto = 0;
+    int emAndamento = 0;
+    int resolvido = 0;
+
+    for (Chamado chamado : chamados) {
+        if (chamado.status() == Status.ABERTO) {
+            aberto++;
+        } else if (chamado.status() == Status.EM_ANDAMENTO) {
+            emAndamento++;
+        } else if (chamado.status() == Status.RESOLVIDO) {
+            resolvido++;
+        }
+    }
+
+    return new ResumoChamados(aberto, emAndamento, resolvido, chamados.size());
+}
 }
