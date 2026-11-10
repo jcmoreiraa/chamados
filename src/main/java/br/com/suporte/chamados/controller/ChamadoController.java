@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.ResponseEntity;
 
 import br.com.suporte.chamados.model.Chamado;
@@ -89,5 +91,49 @@ public ResumoChamados listarChamadoPorStatus() {
     }
 
     return new ResumoChamados(aberto, emAndamento, resolvido, chamados.size());
+}
+
+@GetMapping("/setor")
+public List<Chamado> filtrarPorSetor(@RequestParam("nome") String nome) {
+    List<Chamado> resultado = new ArrayList<>();
+    for (Chamado chamado : chamados) {
+        if (chamado.setor() != null && chamado.setor().equalsIgnoreCase(nome)) {
+            resultado.add(chamado);
+        }
+    }
+    return resultado;
+}
+
+@GetMapping("/prioridade")
+public List<Chamado> filtrarPorPrioridade(@RequestParam("nivel") String nivel) {
+    List<Chamado> resultado = new ArrayList<>();
+    for (Chamado chamado : chamados) {
+        if (chamado.prioridade().name().equalsIgnoreCase(nivel)) {
+            resultado.add(chamado);
+        }
+    }
+    return resultado;
+}
+
+@GetMapping("/busca")
+public List<Chamado> buscarPorTitulo(@RequestParam("texto") String texto) {
+    List<Chamado> resultado = new ArrayList<>();
+    for (Chamado chamado : chamados) {
+        if (chamado.titulo() != null && chamado.titulo().toLowerCase().contains(texto.toLowerCase())) {
+            resultado.add(chamado);
+        }
+    }
+    return resultado;
+}
+
+@GetMapping("/criticos")
+public List<Chamado> listarCriticos() {
+    List<Chamado> resultado = new ArrayList<>();
+    for (Chamado chamado : chamados) {
+        if (chamado.prioridade() == Prioridade.ALTA && chamado.status() != Status.RESOLVIDO) {
+            resultado.add(chamado);
+        }
+    }
+    return resultado;
 }
 }
